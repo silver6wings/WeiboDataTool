@@ -1,6 +1,7 @@
+package dataCollectors;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-
 
 //import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -8,22 +9,28 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 
-public class DailyDataConverter {
+import dataTools.ExcelTools;
 
-	public static String targetFilePath = "d:/数据/趋势daily下发量汇总20141111.xls";
+public class DailyData {
+
+	public static String targetFilePath = "d:/数据/趋势daily下发量汇总20141123.xls";
 	public FormulaEvaluator e;
     
-	
 	public static void main(String[] args) {
 		
-		DailyDataConverter ddc = new DailyDataConverter();
-		System.out.println(ddc.doConvert("d:/数据/feed-daily-report-v2-20141111.xls", targetFilePath, 27));
-//		System.out.println(ddc.doConvert("d:/数据/feed-daily-report-v2-20141107.xls", targetFilePath, 27));
-//		System.out.println(ddc.doConvert("d:/数据/feed-daily-report-v2-20141108.xls", targetFilePath, 27));
-//		System.out.println(ddc.doConvert("d:/数据/feed-daily-report-v2-20141109.xls", targetFilePath, 27));
-//		System.out.println(ddc.doConvert("d:/数据/feed-daily-report-v2-20141110.xls", targetFilePath, 27));
-//		System.out.println(ddc.doConvert("d:/数据/feed-daily-report-v2-20141103.xls", targetFilePath, 27));
-//		System.out.println(ddc.doConvert("d:/数据/feed-daily-report-v2-20141104.xls", targetFilePath, 27));
+		try{
+			DailyData ddc = new DailyData();
+			System.out.println(ddc.doConvert("d:/数据/feed-daily-report-v2-20141121.xls", targetFilePath, 27));
+			System.out.println(ddc.doConvert("d:/数据/feed-daily-report-v2-20141122.xls", targetFilePath, 27));
+			System.out.println(ddc.doConvert("d:/数据/feed-daily-report-v2-20141123.xls", targetFilePath, 27));
+//			System.out.println(ddc.doConvert("d:/数据/feed-daily-report-v2-20141115.xls", targetFilePath, 27));
+//			System.out.println(ddc.doConvert("d:/数据/feed-daily-report-v2-20141116.xls", targetFilePath, 27));
+//			System.out.println(ddc.doConvert("d:/数据/feed-daily-report-v2-20141103.xls", targetFilePath, 27));
+//			System.out.println(ddc.doConvert("d:/数据/feed-daily-report-v2-20141104.xls", targetFilePath, 27));
+			System.out.println("Done!");
+		} catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 
 	// 进行转换

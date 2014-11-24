@@ -1,3 +1,7 @@
+package dataCollectors;
+
+import dataTools.ExcelTools;
+
 import java.io.FileInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -13,21 +17,24 @@ import org.htmlparser.util.NodeList;
 
 public class IncData {
 
-	static String myDate = "2014-11-12";
-	static String myFilePath = "D:/数据增量/增量数据11-12.xls";
+	static String today = "11-23";
+	static String myDate = "2014-" + today;
+	static String myFilePath = "D:/数据增量/增量数据" + today + ".xls";
 	static HSSFWorkbook myWorkbook;
 
 	public static void main(String[] args) {
 
+		System.out.println("Start:");
 		try {
 			myWorkbook = new HSSFWorkbook(new FileInputStream(myFilePath));
 			getData(myDate, "1045595010", "Android", 0);
 			getData(myDate, "1046095010", "Android", 1);
 			getData(myDate, "1046195010", "Android", 2);
+			getData(myDate, "1046295010", "Android", 3);
 			
-			getData(myDate, "1045593010", "iPhone", 0);
-			getData(myDate, "1046093010", "iPhone", 1);
-			getData(myDate, "1046193010", "iPhone", 2);
+			getData(myDate, "1046093010", "iPhone", 0);
+			getData(myDate, "1046193010", "iPhone", 1);
+			getData(myDate, "1046593010", "iPhone", 2);
 			
 			for (int i = 0; i < 3; i++) 
 				myWorkbook.getSheetAt(i).setForceFormulaRecalculation(true);
@@ -51,6 +58,7 @@ public class IncData {
 		NodeList nodeList = parser.parse(filter);
 		
 		ExcelTools.writeStrTo(date, myWorkbook, sheet, 0, w * c);
+		ExcelTools.writeStrTo(from, myWorkbook, sheet, 1, w * c);
 		
 		for (int i = 0; i < nodeList.size(); i++) {
 			if (nodeList.elementAt(i) instanceof TableTag) {
