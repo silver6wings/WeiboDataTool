@@ -17,28 +17,62 @@ import org.htmlparser.util.NodeList;
 
 public class IncData {
 
-	static String today = "11-23";
-	static String myDate = "2014-" + today;
-	static String myFilePath = "D:/数据增量/增量数据" + today + ".xls";
-	static HSSFWorkbook myWorkbook;
-
+	/*
+	 * 日常需要做的工作：
+	 * 1.改动main函数的里边的日期
+	 * 2.运行程序跑出结果
+	 * 3.检查结果是否异常
+	 * 4.若没有异常则将结果复制粘贴进增量汇总表并邮件汇报
+	 * 5.若有异常一般为发新版丢数据，则执行下边的步骤
+	 * 	1）将增量模板的数据添加一大列并标记好新的From值
+	 * 	2）在最左列更新橙色部分的公式（多一个求和项）
+	 * 	3）切换至汇总界面Ctrl+A全选之后保存
+	 * 	4）代码里更新getDataForDay添加对应的getDataByFrom（注意保持列数对应）
+	 * 	5）重新执行步骤2来统计数据结果
+	 * 6.若异常并非由于发新版丢数据则找林华协调沟通解决
+	 */
+	
 	public static void main(String[] args) {
+		// 调整这里
+		getDataForDay("02-04", "D:/数据增量/增量模板.xls");
+		getDataForDay("02-05", "D:/数据增量/增量模板.xls");
+		getDataForDay("02-06", "D:/数据增量/增量模板.xls");
+		getDataForDay("02-07", "D:/数据增量/增量模板.xls");
+		getDataForDay("02-08", "D:/数据增量/增量模板.xls");
+	}
+	
+	/**
+	 * 每天需要统计的数据
+	 * @param today 今天的日期
+	 * @param samplePath 模板的路径
+	 */
+	static void getDataForDay(String today, String samplePath) {
 
-		System.out.println("Start:");
+		String myDate = "2015-" + today;
+		String myFilePath = "D:/数据增量/增量" + today + ".xls";
+		
 		try {
-			myWorkbook = new HSSFWorkbook(new FileInputStream(myFilePath));
-			getData(myDate, "1045595010", "Android", 0);
-			getData(myDate, "1046095010", "Android", 1);
-			getData(myDate, "1046195010", "Android", 2);
-			getData(myDate, "1046295010", "Android", 3);
+			HSSFWorkbook myWorkbook = new HSSFWorkbook(new FileInputStream(samplePath));
+			getDataByFrom(myDate, "1045595010", myWorkbook, "Android", 1);
+			getDataByFrom(myDate, "1046095010", myWorkbook, "Android", 2);
+			getDataByFrom(myDate, "1046195010", myWorkbook, "Android", 3);
+			getDataByFrom(myDate, "1046295010", myWorkbook, "Android", 4);
+			getDataByFrom(myDate, "1050015010", myWorkbook, "Android", 5);
+			getDataByFrom(myDate, "1050095010", myWorkbook, "Android", 6);
+			getDataByFrom(myDate, "1051095010", myWorkbook, "Android", 7);
+
+			getDataByFrom(myDate, "1046093010", myWorkbook, "iPhone", 1);
+			getDataByFrom(myDate, "1046193010", myWorkbook, "iPhone", 2);
+			getDataByFrom(myDate, "1046593010", myWorkbook, "iPhone", 3);
+			getDataByFrom(myDate, "1046693010", myWorkbook, "iPhone", 4);
+			getDataByFrom(myDate, "1050093010", myWorkbook, "iPhone", 5);
+			getDataByFrom(myDate, "1050193010", myWorkbook, "iPhone", 6);
+			getDataByFrom(myDate, "1050293010", myWorkbook, "iPhone", 7);
+			getDataByFrom(myDate, "1051093010", myWorkbook, "iPhone", 8);
 			
-			getData(myDate, "1046093010", "iPhone", 0);
-			getData(myDate, "1046193010", "iPhone", 1);
-			getData(myDate, "1046593010", "iPhone", 2);
-			
-			for (int i = 0; i < 3; i++) 
+			for (int i = 0; i < 3; i++) {
 				myWorkbook.getSheetAt(i).setForceFormulaRecalculation(true);
-						
+			}
 			System.out.println("Outing...");
 			ExcelTools.workbookOut(myWorkbook, myFilePath);
 			System.out.println("Done!");
@@ -47,7 +81,16 @@ public class IncData {
 		}
 	}
 
-	static void getData(String date, String from, String sheet, int c) throws Exception {
+	/**
+	 * 将网页上的数据取下塞入模板
+	 * @param date 日期
+	 * @param from 版本号
+	 * @param wb 目标存储文件
+	 * @param sheet 目标表名
+	 * @param c 表的第几大列（不要写0为源数据页）
+	 * @throws Exception
+	 */
+	static void getDataByFrom(String date, String from, HSSFWorkbook wb, String sheet, int c) throws Exception {
 		int w = 8;
 		String strURL = "http://172.16.193.178/utils/incr_stats2?date=" + date + "&from=" + from;
 
@@ -57,8 +100,8 @@ public class IncData {
 		NodeFilter filter = new NodeClassFilter(TableTag.class);
 		NodeList nodeList = parser.parse(filter);
 		
-		ExcelTools.writeStrTo(date, myWorkbook, sheet, 0, w * c);
-		ExcelTools.writeStrTo(from, myWorkbook, sheet, 1, w * c);
+		ExcelTools.writeStrTo(date, wb, sheet, 0, w * c);
+		ExcelTools.writeStrTo(from, wb, sheet, 1, w * c);
 		
 		for (int i = 0; i < nodeList.size(); i++) {
 			if (nodeList.elementAt(i) instanceof TableTag) {
@@ -73,7 +116,7 @@ public class IncData {
 							String info = columns[k].toPlainTextString().trim();
 							System.out.println(info);
 
-							ExcelTools.writeNumTo(parseContent(info), myWorkbook, sheet, 5 + j, w * c + k + 1);
+							ExcelTools.writeNumTo(parseContent(info), wb, sheet, 5 + j, w * c + k + 1);
 						}
 					}
 				}
@@ -86,7 +129,7 @@ public class IncData {
 							String info = columns[k].toPlainTextString().trim();
 							System.out.println(info);
 
-							ExcelTools.writeNumTo(parseContent(info), myWorkbook, sheet, 10, w * c + k);
+							ExcelTools.writeNumTo(parseContent(info), wb, sheet, 10, w * c + k);
 						}
 					}
 				}
@@ -99,7 +142,7 @@ public class IncData {
 							String info = columns[k].toPlainTextString().trim();
 							System.out.println(info);
 
-							ExcelTools.writeNumTo(parseContent(info), myWorkbook, sheet, 12 + j, w * c + k + 1);
+							ExcelTools.writeNumTo(parseContent(info), wb, sheet, 12 + j, w * c + k + 1);
 						}
 					}
 				}
@@ -111,7 +154,7 @@ public class IncData {
 						for (int k = 0; k < columns.length; ++k) {
 							String info = columns[k].toPlainTextString().trim();
 							System.out.println(info);
-							ExcelTools.writeNumTo(parseContent(info), myWorkbook, sheet, 19 + j, w * c + k + 1);
+							ExcelTools.writeNumTo(parseContent(info), wb, sheet, 19 + j, w * c + k + 1);
 						}
 					}
 
@@ -121,7 +164,7 @@ public class IncData {
 					for (int k = 0; k < columns.length; ++k) {
 						String info = columns[k].toPlainTextString().trim();
 						System.out.println(info);
-						ExcelTools.writeNumTo(parseContent(info), myWorkbook, sheet, 70, w * c + k + 1);
+						ExcelTools.writeNumTo(parseContent(info), wb, sheet, 70, w * c + k + 1);
 					}
 				}
 			}
